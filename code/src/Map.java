@@ -2,6 +2,7 @@
 public class Map {
 
     public String[][] figure;
+    
     public Map(){
         this.figure = null;
     }

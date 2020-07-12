@@ -13,20 +13,22 @@ import javax.swing.JTextField;
 
 import java.util.concurrent.TimeUnit;
 
+
 public class Cliente implements KeyListener {
 
     JFrame frame;
     JTextField tf;
     JLabel lbl;
-    Map map;
-    Tank player;
+    public static Map MAP;
+	public static Tank player;
+	
     Boolean stateCliente;
 
-	//sockets
-	ObjectOutputStream salidaCliente = null;
-	ObjectInputStream entradaCliente = null;
-	Socket cliente = null;
-
+    Socket cliente = null;
+    Socket cliente2 = null;
+    ThreadPlayerSender playerSend;
+    ThreadPlayerListener playerListen;
+	
     public Cliente(){
         frame = new JFrame();
         lbl = new JLabel();
@@ -42,8 +44,8 @@ public class Cliente implements KeyListener {
         frame.setVisible(true);
 
         this.stateCliente = true;
-        this.map = new Map();
-		this.player = new Tank();
+        MAP = new Map();
+		player = new Tank();
 
         this.conectClient();
     }
@@ -52,52 +54,112 @@ public class Cliente implements KeyListener {
 
 		try {
 			//conectarse al juego
-			cliente = new Socket("localhost",80);
-			salidaCliente = new ObjectOutputStream(cliente.getOutputStream());
-			entradaCliente = new ObjectInputStream(cliente.getInputStream());
-			System.out.println("Client conected, waitting other players");
-			startCliente();
+            cliente = new Socket("localhost",80);
+            // Instancio un ThreadListend
+            playerListen = new ThreadPlayerListener(cliente);
+            System.out.println("ThreadPlayerListener");
+            playerListen.SetConection();
+
+            // Instancio un ThreadSend
+            cliente2 = new Socket("localhost",81);
+            playerSend = new ThreadPlayerSender(cliente2);
+            System.out.println("ThreadPlayerSender");
+            playerSend.SetConection();
+			
+            playerListen.start();
+            playerSend.start();
 			
 		} catch (Exception e) {
 			//TODO: handle exception
 		}
-	}
-
-    public void startCliente() {
-
-		try {
-			while(true){
-	
-				// Recibo un intervalow
-				this.map.figure = (String[][]) entradaCliente.readObject();
-							
-				// Realizo el calculo -  realizon un movimiento de juego 
-				this.map.show();
-				this.map = this.player.bullet.move(map);
-				TimeUnit.MILLISECONDS.sleep(10);
-				clearConsole();
-
-				// Envio mi respuesta al servidor
-				salidaCliente.writeObject(this.map.figure);
-
-			} 	
-		}catch (Exception e) {
-			//TODO: handle exception
-		}
-		finally{
-			/* if( entradaCliente != null ) entradaCliente.close();
-			if( salidaCliente != null ) salidaCliente.close();
-			if( cliente != null ) cliente.close(); */
-		}
     }
+    
+    static class ThreadPlayerSender extends Thread{
+		Socket Cliente = null;
+		ObjectOutputStream salidaCliente = null;
 
-    public void clearConsole() {
-        try {
-            new ProcessBuilder("cmd","/c","cls").inheritIO().start().waitFor();
-        } catch (Exception e) {
+		public ThreadPlayerSender(Socket socket){
+			this.Cliente = socket;
+		}
 
+		public void SetConection(){
+			try {				
+				salidaCliente = new ObjectOutputStream(Cliente.getOutputStream());
+
+			} catch (Exception e) {
+				System.err.println("Error: " + e.getMessage());
+			}
+		}
+
+		public void run(){
+			try{
+				int i = 0;
+				while(i<5){
+					// Envio el intervalo al cliente
+					salidaCliente.writeObject("mapa del cliente");
+                    salidaCliente.reset();
+                    i++;
+				}
+			}	
+			catch(Exception e){
+				System.err.println("Error_1: " + e.getMessage());
+			} 	
+		} 
+	} 
+
+    static class ThreadPlayerListener  extends Thread{
+        Socket Cliente = null;
+		ObjectInputStream entradaCliente = null;;
+		Map map = new Map();
+		String mapastr = "";
+		public ThreadPlayerListener (Socket socket){
+			this.Cliente = socket;
+		}
+
+		public void SetConection(){
+			try {
+				
+                entradaCliente = new ObjectInputStream(Cliente.getInputStream());
+                
+
+			} catch (Exception e) {
+				System.err.println("Error: " + e.getMessage());
+			}	
+		}
+
+		public void run(){
+			try{
+				
+				int i = 0;
+				while(i<5){
+					// Leo el resultado que envia el cliente
+					entradaCliente = new ObjectInputStream(Cliente.getInputStream());
+					mapastr = (String) entradaCliente.readObject();
+					System.err.println(mapastr);
+					// Realizo el calculo -  realizon un movimiento de juego 
+					
+					//map.show();
+
+                    //MAP = player.bullet.move(MAP);
+                    TimeUnit.MILLISECONDS.sleep(10);
+                    clearConsole();
+                    i++;
+				}
+			}	
+			catch(Exception e){
+				System.err.println("Error_3: " + e.getMessage());
+			}	
+        } 
+
+        public void clearConsole() {
+            try {
+                new ProcessBuilder("cmd","/c","cls").inheritIO().start().waitFor();
+            } catch (Exception e) {
+    
+            }
         }
     }
+
 
     @Override
     public void keyTyped(KeyEvent ke) {
@@ -108,23 +170,23 @@ public class Cliente implements KeyListener {
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_UP:
-                this.map = this.player.move("up", this.map);
+                MAP = player.move("up", MAP);
                 break;
 
             case KeyEvent.VK_DOWN:
-                this.map = this.player.move("down", this.map);
+                MAP = player.move("down", MAP);
                 break;
 
             case KeyEvent.VK_LEFT:
-                this.map = this.player.move("left", this.map);
+                MAP = player.move("left", MAP);
                 break;
 
             case KeyEvent.VK_RIGHT:
-                this.map = this.player.move("right", this.map);
+                MAP = player.move("right", MAP);
                 break;
 
             case KeyEvent.VK_A:
-                this.player.shoot();
+                player.shoot();
                 break;
 
         }
