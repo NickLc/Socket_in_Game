@@ -1,77 +1,84 @@
 
 
-public class Tank {
-    int position_x=0;
-    int position_y=0;
-    int size = 5;
-    String direction="none";
-    String[][] figure;
-    Bullet bullet;
+import java.util.Random;
 
-    public Tank(){
+public class Tank {
+    int pos_x=0;
+    int pos_y=0;
+    String direction="none";
+    char figure;
+    Bullet bullet;
+    boolean live;
+
+    public Tank(int w, int h){
+        Random rd = new Random();
+        this.pos_x = 1 + rd.nextInt(w-2);
+        this.pos_y = 1 + rd.nextInt(h-2);
         this.figure = getFigure();
-        this.bullet = new Bullet(position_x, position_y);
+        this.bullet = new Bullet(pos_x, pos_y);
+        this.live = true;
+    }
+    
+    public boolean checkIsLive(Map map){
+        if(map.figure[pos_y][pos_x] == '$'){
+            this.live = false;
+            return false;
+        }
+        else{
+            return true;
+        }
     }
 
-    public String[][] getFigure(){
-
-        String[][] fig = {{" ", " ", " ", " ", " "},
-                          {" ", "#","-","#", " "},
-                          {" ", "|"," ","|", " "},
-                          {" ", "#","-","#", " "},
-                          {" ", " ", " ", " ", " "}};
-
+    public char getFigure(){
+        char fig = 'x';    
         return fig;
     }
 
     public Map move(String direction, Map map){
-
+        
         if(direction != this.direction){
             changeDirection(direction);
-            map = setInMap(map);
+            map = setInMap(map,figure);
         }
         else{
+            map = setInMap(map, ' ');
+            int aux_x= pos_x, aux_y=pos_y;
             switch(direction){
-                case "up": this.position_y -= 1; break;
-                case "down": this.position_y += 1; break;
-                case "left": this.position_x -= 1; break;
-                case "right": this.position_x += 1; break;
-                
+                case "up": aux_y -= 1; break;
+                case "down": aux_y += 1; break;
+                case "left": aux_x -= 1; break;
+                case "right": aux_x += 1; break;
             }
-            map = setInMap(map);
+            if(map.figure[aux_y][aux_x] == ' '){
+                pos_x = aux_x;
+                pos_y = aux_y;
+            }
+            map = setInMap(map,figure);
         }
-
         return map;
 
     }
 
     public void changeDirection(String direction){
-        this.figure = getFigure();
+        figure = getFigure();
         this.direction = direction;
         switch(direction){
-            case "up": figure[1][2] = "|";  this.figure[0][2] = "|";  break;
-            case "down": this.figure[3][2] = "|";  this.figure[4][2] = "|"; break;
-            case "left": this.figure[2][1] = "-";  this.figure[2][0] = "-"; break;
-            case "right": this.figure[2][3] = "-";  this.figure[2][4] = "-"; break;
+            case "up": figure = '^';   break;
+            case "down": figure = 'v'; break;
+            case "left": figure = '<';  break;
+            case "right": figure = '>';  break;
         }
     }
 
     public void show(){
-        for(int h = 0; h<size; h++){
-            for(int w=0; w<size; w++)
-                System.out.print(this.figure[h][w]);
-            System.out.println();    
-        }
+        System.out.print(this.figure);
+        System.out.println();    
     }
 
     
-    public Map setInMap(Map map){
+    public Map setInMap(Map map, char fig){
         try {
-            for(int y=0; y<this.size; y++){
-                for(int x=0; x<this.size; x++){
-                    map.figure[y+this.position_y][x+this.position_x] = this.figure[y][x]; 
-                }
-            }
+            map.figure[this.pos_y][this.pos_x] = fig; 
             return map;
         } catch (Exception e) {
             return map;
@@ -80,21 +87,12 @@ public class Tank {
 
     public void shoot(){
         if(this.bullet.ready){
-            
-            this.bullet.direction = this.direction;
-            int aux_x = this.position_x;
-            int aux_y = this.position_y;
-            switch(this.direction){
-                case "up": aux_x += 2; break;
-                case "down": aux_x += 2; aux_y += 4 ; break;
-                case "left": aux_y += 2; break;
-                case "right": aux_y += 2; aux_x += 4; break;
-            }
-            this.bullet.pos_x = aux_x;
-            this.bullet.pos_y = aux_y;
+            this.bullet.direction = direction;
+            this.bullet.pos_x = this.pos_x;
+            this.bullet.pos_y = this.pos_y;
             this.bullet.ready = false;
+            this.bullet.start = true;
         }
     }
-
-
 }
+

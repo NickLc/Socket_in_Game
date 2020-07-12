@@ -33,15 +33,20 @@ public class Game implements KeyListener {
         frame.setVisible(true);
 
         this.stateGame = true;
-        this.map = new Map(20, 50);
-        this.player = new Tank();
+        map = new Map();
+
+        this.player = new Tank(map.width, map.height);
+        map = this.player.setInMap(map, this.player.figure);
         this.startGame();
     }
 
     public void startGame() throws InterruptedException {
         for(;;){
-            this.map.show();
+            //map.convertStringtoMap();
+            map.show();
+            //System.out.println(this.map.toString());
             this.map = this.player.bullet.move(map);
+            this.player.checkIsLive(map);
             TimeUnit.MILLISECONDS.sleep(100);
             clearConsole();
         }
@@ -82,9 +87,7 @@ public class Game implements KeyListener {
             case KeyEvent.VK_A:
                 this.player.shoot();
                 break;
-
         }
-        
     }
  
     @Override
