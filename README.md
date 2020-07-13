@@ -1,4 +1,4 @@
-## INFORME 02: Battle City
+## BATTLE CITY
 
 Estudiantes:
 
@@ -88,15 +88,15 @@ Este laboratorio se basa en la modalidad del juego Battle City pero no adopta to
 
 ```mermaid
 classDiagram
-	  Map -- Bullet
-	  Cliente -- ThreadOutputPlayer
-	  Cliente -- ThreadInputPlayer
-	  Servidor -- ThreadOutputPlayer
-	  Servidor -- ThreadInputPlayer
-	  Game -- Map
-	  Game -- Tank
-	  Map -- Servidor
-	  Map -- Cliente
+      Map -- Bullet
+      Cliente -- ThreadOutputPlayer
+      Cliente -- ThreadInputPlayer
+      Servidor -- ThreadOutputPlayer
+      Servidor -- ThreadInputPlayer
+      Game -- Map
+      Game -- Tank
+      Map -- Servidor
+      Map -- Cliente
       class Map{
           +char[][] figure
           +int height
@@ -117,7 +117,7 @@ classDiagram
           +move()
       }
       class Cliente{
-          +String action          
+          +String action
       }
       class ThreadOutputPlayer{
       	  +JFrame frame
@@ -340,23 +340,23 @@ Para la prueba del programa, se exportó un artefacto `.jar` que fue ejecutado p
 
 Se pudo observar al servidor a la espera de los clientes:
 
-![01](img\06.jpeg)
+<img src="img\06.jpeg" alt="08" style="zoom: 80%;" />
 
 Luego de que el `jugador 0` se conectase, el servidor muestra:
 
-![02](img\07.jpeg)
+<img src="img\07.jpeg" alt="08" style="zoom: 80%;" />
 
 Para el jugador conectado, se muestra:
 
-![03](img\08.jpeg)
+<img src="img\08.jpeg" alt="08" style="zoom: 80%;" />
 
 Luego de que ambos clientes están conectados:
 
-![04](img\09.jpeg)
+<img src="img\09.jpeg" alt="08" style="zoom: 80%;" />
 
 Y empieza el juego, mostrándose para ambas pantallas el mapa:
 
-![05](img\10.jpeg)
+<img src="img\10.jpeg" alt="08" style="zoom: 80%;" />
 
 Aunque la tasa de recarga es rápida, como son máquinas virtuales no se puede apreciar bien la carga del mapa por algunos parpadeos de la consola.
 
@@ -364,9 +364,9 @@ Una vez empezado el juego, cuando uno de los clientes pierde, en este caso el `j
 
 **En el servidor:**
 
-![06](img\11.jpeg)
+<img src="img\11.jpeg" alt="08" style="zoom: 80%;" />
 
-![065](img\12.jpeg)
+<img src="img\12.jpeg" alt="08" style="zoom: 80%;" />
 
 **Jugador 0:**
 
